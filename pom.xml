@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.jsonbuddy</groupId>
     <artifactId>jsonbuddy</artifactId>
-    <version>0.11.0-SNAPSHOT</version>
+    <version>0.16</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
     </properties>
 
     <packaging>jar</packaging>
@@ -31,13 +32,19 @@
             <email>karlsenanders@gmail.com</email>
             <organizationUrl>https://github.com/anders88</organizationUrl>
         </developer>
+        <developer>
+            <name>Johannes Brodwall</name>
+            <email>jhannes@gmail.com</email>
+            <organizationUrl>https://github.com/jhannes</organizationUrl>
+        </developer>
     </developers>
 
     <scm>
-        <connection>scm:git:git@github.com:anders88/jsonbuddy.git</connection>
-        <developerConnection>scm:git:git@github.com:anders88/jsonbuddy.git</developerConnection>
-        <url>git@github.com:anders88/jsonbuddy.git</url>
-    </scm>
+        <connection>scm:git:https://github.com/anders88/jsonbuddy.git</connection>
+        <developerConnection>scm:git:https://github.com/anders88/jsonbuddy.git</developerConnection>
+        <url>https://github.com/anders88/jsonbuddy.git</url>
+      <tag>HEAD</tag>
+  </scm>
 
     <dependencies>
         <dependency>
@@ -53,10 +60,27 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-generator-annprocess</artifactId>
+            <version>1.35</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-core</artifactId>
+            <version>1.35</version>
+        </dependency>
+        <dependency>
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy</artifactId>
-            <version>1.6.9</version>
+            <version>1.10.1</version>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>RELEASE</version>
+            <scope>test</scope>
         </dependency>
 
     </dependencies>
@@ -64,10 +88,21 @@
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
+                <version>3.8.1</version>
                 <configuration>
-                    <target>1.8</target>
-                    <source>1.8</source>
+                    <target>1.19</target>
+                    <source>1.19</source>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Automatic-Module-Name>org.jsonbuddy</Automatic-Module-Name>
+                        </manifestEntries>
+                    </archive>
                 </configuration>
             </plugin>
             <plugin>
@@ -78,7 +113,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.7.5.201505241946</version>
+                <version>0.8.4</version>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>
@@ -87,6 +122,32 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5.3</version>
+                <configuration>
+                    <preparationGoals>javadoc:javadoc</preparationGoals>
+                    <releaseProfiles>release</releaseProfiles>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.1.1</version>
+                <configuration>
+                    <doclint>all,-missing</doclint>
+                    <source>8</source>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.19.1</version>
+                <configuration>
+                    <argLine>-Djdk.attach.allowAttachSelf=true</argLine>
+                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -110,7 +171,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
-                        <version>2.2.1</version>
+                        <version>3.1.0</version>
                         <executions>
                             <execution>
                                 <id>attach-sources</id>
@@ -123,23 +184,19 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>2.9.1</version>
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>
                                 <goals>
                                     <goal>jar</goal>
                                 </goals>
-                                <configuration>
-                                    <additionalparam>-Xdoclint:none</additionalparam>
-                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.5</version>
+                        <version>1.6</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
@@ -153,7 +210,7 @@
                     <plugin>
                         <groupId>org.sonatype.plugins</groupId>
                         <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>1.6.3</version>
+                        <version>1.6.8</version>
                         <extensions>true</extensions>
                         <configuration>
                             <serverId>ossrh</serverId>
@@ -161,10 +218,19 @@
                             <autoReleaseAfterClose>true</autoReleaseAfterClose>
                         </configuration>
                     </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>2.19.1</version>
+                        <configuration>
+                            <argLine>-Djdk.attach.allowAttachSelf=true</argLine>
+                        </configuration>
+                    </plugin>
                 </plugins>
             </build>
         </profile>
     </profiles>
+
 
 
 </project>
